@@ -1,0 +1,51 @@
+name: Terraform Execute (Apply or Destroy)
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Escolha a ação para executar"
+        required: true
+        default: "apply"
+        type: choice
+        options:
+          - apply
+          - destroy
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+
+    env:
+      TF_INPUT: false
+      TF_IN_AUTOMATION: true
+      AWS_REGION: us-east-1
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Instalar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      - name: Inicializar Terraform
+        run: terraform init
+
+      - name: Executar Apply ou Destroy
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "apply" ]; then
+            terraform apply -auto-approve -var-file="terraform.tfvars"
+          else
+            terraform destroy -auto-approve -var-file="terraform.tfvars"

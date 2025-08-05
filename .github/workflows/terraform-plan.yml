@@ -1,16 +1,7 @@
-name: Terraform EKS Deploy
+name: Terraform Plan
 
 on:
   workflow_dispatch:
-    inputs:
-      action:
-        description: "Escolha a ação do Terraform"
-        required: true
-        default: "apply"
-        type: choice
-        options:
-          - apply
-          - destroy
 
 jobs:
   terraform:
@@ -46,9 +37,5 @@ jobs:
       - name: Validar Terraform
         run: terraform validate
 
-      - name: Executar Terraform Apply ou Destroy
-        run: |
-          if [ "${{ github.event.inputs.action }}" == "apply" ]; then
-            terraform apply -auto-approve -var-file="terraform.tfvars"
-          else
-            terraform destroy -auto-approve -var-file="terraform.tfvars"
+      - name: Executar Terraform Plan
+        run: terraform plan -var-file="terraform.tfvars"
