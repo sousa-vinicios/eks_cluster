@@ -44,12 +44,21 @@ jobs:
         run: terraform init
 
       - name: Executar Apply ou Destroy
+        env:
+          ACTION: ${{ github.event.inputs.action }}
         run: |
-          ACTION="${{ github.event.inputs.action }}"
           if [ "$ACTION" == "apply" ]; then
             terraform apply -auto-approve -var-file="terraform.tfvars"
+          elif [ "$ACTION" == "destroy" ]; then
+            echo "Gerando plano de destruição..."
+            terraform plan -destroy -out=tfplan -var-file="terraform.tfvars"
+
+            echo "Aplicando destruição..."
+            terraform apply -auto-approve tfplan
           else
-            terraform destroy -auto-approve -var-file="terraform.tfvars"
+            echo "Ação inválida: $ACTION"
+            exit 1
           fi
+
 
 
