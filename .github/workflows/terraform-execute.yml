@@ -45,8 +45,11 @@ jobs:
 
       - name: Executar Apply ou Destroy
         run: |
-          if [ "${{ github.event.inputs.action }}" == "apply" ]; then
+          ACTION="${{ github.event.inputs.action }}"
+          if [ "$ACTION" == "apply" ]; then
             terraform apply -auto-approve -var-file="terraform.tfvars"
           else
             terraform destroy -auto-approve -var-file="terraform.tfvars"
           fi
+
+
